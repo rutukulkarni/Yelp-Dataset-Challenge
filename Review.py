@@ -7,6 +7,6 @@ class Review:
         self.stars = review["stars"]
         self.type = review["type"]
         self.date = review["date"]
-        self.reviewScore = 0
+        self.reviewScore = review["sentiment"]
 
 
