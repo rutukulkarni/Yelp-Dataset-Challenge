@@ -20,6 +20,13 @@ userIdList = []
 restIdList = []
 commonMoviesSeen = 0.0
 
+class recommendedRest:
+     def __init__(self):
+         restaurantId = ""
+         predictedRating = 0
+         predictedBy = 0
+
+
 def getDistance(firstUser, secondUser):
     commonRestaurantsVisited = len(firstUser)
     scalingFactor = float(commonRestaurantsVisited)/noOfRestaurants
@@ -27,9 +34,38 @@ def getDistance(firstUser, secondUser):
     distance = 1 / (1 + (float(scipy_dist.euclidean(firstUser,secondUser)) * scalingFactor))
     return distance
 
-# def getNearestFriendRestaurants(nearestFriends):
-#     for frnd in nearestFriends:
-#         for review in reviewList:
+
+def getRecommendedRest(nearestFriends,userRestMatrix,userIndex):
+    print "in getRecommendRest"
+
+    possibleRating = 0.0
+    possibleRatingCnt = 0
+    #userIndex = userIdList.index(user)
+    tempRecoList = userIdList[userIndex]
+    recoList = dict()
+
+    for rIndex in range(len(tempRecoList)):
+        for frndIndex in range(len(nearestFriends)):
+            if userRestMatrix[frndIndex][rIndex] != 0.0:
+                possibleRating += userRestMatrix[frndIndex][rIndex]
+                possibleRatingCnt += 1
+
+        if possibleRatingCnt == 0:
+		    possibleRating = userRestMatrix[userIndex][rIndex]
+        else:
+		    possibleRating /= possibleRatingCnt
+
+        restId = restIdList[rIndex]
+        recoList[restId] = possibleRating
+
+    recoList = sorted(recoList.items(), key=lambda x: x[1], reverse = True)
+
+
+    print "recommendation done!"
+
+    print recoList
+
+
 
 def suggestionModel(user, restaurant, k, distanceMatrix, userRestMatrix):
 
@@ -60,9 +96,10 @@ def suggestionModel(user, restaurant, k, distanceMatrix, userRestMatrix):
                 nearestFriends.append(nearestUsers[j].userId)
             else:
                 nearestFriends = list(nearestUsers)
-                #getNearestFriendRestaurants(nearestFriends)
+            #predictionList = getNearestFriendRestaurants(nearestFriends)
         else:
             break
+    getRecommendedRest(nearestFriends, userRestMatrix,user)
 
 
 def generateDistanceMatrix(userRestMatrix):
@@ -110,7 +147,7 @@ def getConnection():
 
 def getReviews():
     db = getConnection()
-    collection = db.reviewsWithSentiments
+    collection = db.reviews
     uniqueId = 0
     for review in collection.find():
         reviewObj = rv.Review(review)
