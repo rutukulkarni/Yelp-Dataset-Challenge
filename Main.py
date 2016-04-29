@@ -7,8 +7,7 @@ import Restaurant as r
 import Review as rv
 
 #INPUT PARAMETERS
-userInput = 9
-restInput = 25
+userInput = 105
 k = 100
 
 noOfUsers = 0
@@ -36,7 +35,7 @@ def getDistance(firstUser, secondUser):
 
 
 def getRecommendedRest(nearestFriends,userRestMatrix,userIndex):
-    print "in getRecommendRest"
+    #print "in getRecommendRest"
 
     possibleRating = 0.0
     possibleRatingCnt = 0
@@ -56,18 +55,22 @@ def getRecommendedRest(nearestFriends,userRestMatrix,userIndex):
 		    possibleRating /= possibleRatingCnt
 
         restId = restIdList[rIndex]
-        recoList[restId] = possibleRating
+        restName = restaurantList[rIndex].name
+        recoList[restName] = possibleRating
 
     recoList = sorted(recoList.items(), key=lambda x: x[1], reverse = True)
 
 
     print "recommendation done!"
 
-    print recoList
+
+    for suggestion in range(len(recoList)):
+        if recoList[suggestion][1]>0.1:
+            print recoList[suggestion]
 
 
 
-def suggestionModel(user, restaurant, k, distanceMatrix, userRestMatrix):
+def suggestionModel(user, k, distanceMatrix, userRestMatrix):
 
     nearestUsers = []
     nearestUserIds = []
@@ -76,8 +79,8 @@ def suggestionModel(user, restaurant, k, distanceMatrix, userRestMatrix):
     distances.sort(reverse=True)
     userVector = list(userRestMatrix[user])
     userVector.sort(reverse = True)
-    print "distanceMatrixp[user]",distances
-    print "vector",userVector
+    #print "distanceMatrixp[user]",distances
+    #print "vector",userVector
 
     for i in range(k):
         userIndex = distanceMatrix[user].index(distances[i])
@@ -90,9 +93,9 @@ def suggestionModel(user, restaurant, k, distanceMatrix, userRestMatrix):
     nearestFriends = []
     for j in range(len(nearestUsers)-1):
         if nearestUsers[j]!=nearestUsers[j+1]:
-            print nearestUsers[j].userId
+            #print nearestUsers[j].userId
             if userRestMatrix[nearestUserIds[j]].__contains__(userInput):
-                print userInput, "is friend of", userRestMatrix[nearestUserIds[j]]
+                #print userInput, "is friend of", userRestMatrix[nearestUserIds[j]]
                 nearestFriends.append(nearestUsers[j].userId)
             else:
                 nearestFriends = list(nearestUsers)
@@ -119,12 +122,12 @@ def generateDistanceMatrix(userRestMatrix):
                             secondUser.append(userRestMatrix[user2][rest])
                     if(len(firstUser)>0):
                         distanceMatrix[user1][user2] = distanceMatrix[user2][user1] = getDistance(firstUser,secondUser)
-                        print "u1: ",user1, " u2: ",user2, " dist: ",distanceMatrix[user1][user2]
+                        #print "u1: ",user1, " u2: ",user2, " dist: ",distanceMatrix[user1][user2]
                 else:
                     distanceMatrix[user2][user1] = distanceMatrix[user1][user2]
     pickle.dump( distanceMatrix, open("distance.p","wb"))
 
-    suggestionModel(userInput, restInput, k, distanceMatrix, userRestMatrix)
+    suggestionModel(userInput, k, distanceMatrix, userRestMatrix)
 
 def getUserRestMapping():
     userRestMatrix = [[0.0 for x in range(noOfRestaurants)] for x in range(noOfUsers)]
@@ -135,7 +138,7 @@ def getUserRestMapping():
             restaurantIndex = restIdList.index(review.restaurantId)
             if userIndex < noOfUsers and restaurantIndex < noOfRestaurants:
                 userRestMatrix[userIndex][restaurantIndex] = (review.stars/5.0 + review.reviewScore)/2.0
-                print "user: ", userIndex, "rest: ",restaurantIndex, "review: ",userRestMatrix[userIndex][restaurantIndex]
+                #print "user: ", userIndex, "rest: ",restaurantIndex, "review: ",userRestMatrix[userIndex][restaurantIndex]
 
         #print "dsd"
     generateDistanceMatrix(userRestMatrix)
